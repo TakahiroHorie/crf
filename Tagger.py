@@ -8,10 +8,10 @@ class Tagger:
 		self.strType = strType ## katakana, surface
 		self.corpus = corpus
 
-		self.wordPosIOData = None
-		self.charBIESOData = None
-		self.bigramData = None
-		self.orthoData = None
+		self.__wordPosIOData = None
+		self.__charBIESOData = None
+		self.__bigramData = None
+		self.__orthoData = None
 
 	## TODO: XML処理の機能を分ける
 	def makeWordPosLoanIO(self):
@@ -28,7 +28,6 @@ class Tagger:
 					ea = wordeme.find("SUW")
 					pos = ea.get("pos")
 					new_sent.append([ea.get("orthToken"), pos, "I-外来語"])
-					# print(ea.get("orthToken"))
 				## 外来語以外
 				elif (wordeme.tag == "SUW"):
 					eb = wordeme
@@ -42,11 +41,11 @@ class Tagger:
 						elif self.strType == "surface":
 							new_sent.append([eb.get("orthToken"), pos, "O-外来語"])		
 			data.append(new_sent)
-		self.wordPosIOData = data
+		self.__wordPosIOData = data
 
 	def makeCharLoanBIESO(self):
 		data = []
-		for sent in self.wordPosIOData:
+		for sent in self.__wordPosIOData:
 			new_sent = []
 			for i in range(len(sent)):
 				word = sent[i]
@@ -61,11 +60,11 @@ class Tagger:
 
 					new_sent.append([word[0][j], loan_tag])
 			data.append(new_sent)
-		self.charBIESOData = data
+		self.__charBIESOData = data
 
 	def makeCharBigram(self):
 		data = []
-		for sent in self.wordPosIOData:
+		for sent in self.__wordPosIOData:
 			new_sent = []
 			for i in range(len(sent)):
 				word = sent[i]
@@ -85,7 +84,7 @@ class Tagger:
 					new_sent.append([bigram_1, bigram_2])
 
 			data.append(new_sent)
-		self.bigramData = data
+		self.__bigramData = data
 
 	def makeCharOrtho(self):
 		## Hi: ひらがな, Ka: カタカナ, Ch: 漢字, Se: 送り仮名
@@ -95,7 +94,7 @@ class Tagger:
 		re_Ch = re.compile(r"[一-龠|々|ヿ|〓]")
 
 		orthoData = []
-		for sent in self.wordPosIOData:
+		for sent in self.__wordPosIOData:
 			new_sent = []
 			for word in sent:
 				poss = self.procPos(word[1])
@@ -113,23 +112,22 @@ class Tagger:
 						elif re_Hi.search(char)!=None: ortho = "Ka"
 						elif re_Ka.search(char)!=None: ortho = "Ka"
 						else: ortho = "An"
-					# print(char, ortho)
 					new_sent.append([ortho])
 			orthoData.append(new_sent)
-		self.orthoData = orthoData
+		self.__orthoData = orthoData
 
-	def getWordPosLoanIO(self): return self.wordPosIOData
+	def getWordPosLoanIO(self): return self.__wordPosIOData
 
-	def getCharLoanBIESO(self): return self.charBIESOData
+	def getCharLoanBIESO(self): return self.__charBIESOData
 
-	def getCharBigram(self): return self.bigramData
+	def getCharBigram(self): return self.__bigramData
 
-	def getCharOrtho(self): return self.orthoData
+	def getCharOrtho(self): return self.__orthoData
 
 	def printMergeList(self):
 		## WORD, POS, IO
 		## CHAR, BIESO, BIGRAM(len=2), ORTHO
-		for (a, b, c) in zip(self.charBIESOData, self.bigramData, self.orthoData):
+		for (a, b, c) in zip(self.__charBIESOData, self.__bigramData, self.__orthoData):
 			for i in range(len(a)):
 				print("{0[0]} {2[0]} {1[0]} {1[1]} {0[1]}".format\
 					([jaconv.hira2kata(word) for word in a[i]],\
