@@ -2,6 +2,30 @@
 import re, jaconv
 from xml.etree.ElementTree import *
 
+class XMLProcessor:
+	def __init__(self, corpus:str):
+		self.corpus = corpus
+
+		self.__convData = None
+
+	## TODO: XML処理の機能を分ける
+	def convertXML2List(self):
+		tree = parse(self.corpus)
+		root = tree.getroot()
+		elem_sen = root.findall(".//s")
+		data = []
+		for sent in elem_sen:
+			new_sent = []
+			for wordeme in sent:
+				new_sent.append([wordeme.tag, wordeme.get("orthToken"), wordeme.get("lForm"), wordeme.get("pos")])
+			data.append(new_sent)
+		self.__convData = data
+
+	def getXML2List(self): return self.__convData
+
+
+
+
 class Tagger:
 
 	def __init__(self, strType:str, corpus:str):
